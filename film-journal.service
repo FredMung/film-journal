@@ -1,0 +1,14 @@
+[Unit]
+Description=Film Journal (frame logger, port 5010)
+After=network-online.target mnt-nas\x2dtransit.mount
+Wants=network-online.target
+
+[Service]
+User=fredmung
+WorkingDirectory=/home/fredmung/film-journal
+ExecStart=/home/fredmung/film-journal/.venv/bin/gunicorn --workers 1 --threads 4 --bind 0.0.0.0:5010 app:app
+Restart=on-failure
+Nice=5
+
+[Install]
+WantedBy=multi-user.target

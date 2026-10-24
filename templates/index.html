@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Film Journal">
+  <meta name="theme-color" content="#000000">
+  <title>Film Journal</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-180.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}?v=6">
+</head>
+<body>
+  <main id="app">
+    <!-- ============ SHOOT ============ -->
+    <section id="view-shoot" class="view">
+      <header class="topbar">
+        <h1>Film Journal</h1>
+        <div class="topbar-actions">
+          <span id="outbox-badge" class="pill pill-warn" hidden></span>
+          <button class="icon-btn" data-nav="rolls" aria-label="All rolls">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M8 4v5M16 4v5"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- No roll loaded -->
+      <div id="no-roll" hidden>
+        <div class="card empty-card">
+          <div class="card-title">No roll in a camera</div>
+          <p>Load a roll to start logging frames.</p>
+        </div>
+        <button class="btn btn-primary btn-big" data-nav="new">Load a roll</button>
+      </div>
+
+      <!-- Roll loaded -->
+      <div id="shoot" hidden>
+        <div class="roll-tabs" id="roll-tabs"></div>
+        <button class="roll-chip" id="roll-chip">
+          <div class="roll-chip-main">
+            <span id="chip-camera"></span>
+            <span class="dot">·</span>
+            <span id="chip-stock"></span>
+          </div>
+          <div class="roll-progress"><div id="roll-progress-bar"></div></div>
+          <div class="roll-chip-sub"><span id="chip-count"></span><span>Edit</span></div>
+        </button>
+
+        <div class="card dial-card">
+          <div class="frame-head">
+            <span class="field-label">Frame</span>
+            <span class="frame-number" id="frame-number">1</span>
+            <span id="frame-status" class="pill" hidden>logged · will overwrite</span>
+          </div>
+          <div class="dial dial-frame" id="dial-frame"></div>
+        </div>
+
+        <div class="card dial-card">
+          <div class="dial-head"><span class="field-label">Aperture</span><span class="dial-value" id="val-aperture">—</span></div>
+          <div class="dial" id="dial-aperture"></div>
+          <div class="dial-head"><span class="field-label">Shutter</span><span class="dial-value" id="val-shutter">—</span></div>
+          <div class="dial" id="dial-shutter"></div>
+        </div>
+
+        <div class="snap-row">
+          <label class="snap-tile" id="snap-tile">
+            <input type="file" id="snap-input" accept="image/*" capture="environment" hidden>
+            <img id="snap-preview" alt="" hidden>
+            <span class="snap-empty" id="snap-empty">
+              <svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+              Snapshot
+            </span>
+          </label>
+          <textarea id="note" class="input note" placeholder="Note (optional)" rows="3"></textarea>
+        </div>
+
+        <button id="save-frame" class="btn btn-primary btn-big">Save frame <span id="save-num">1</span></button>
+        <div class="btn-row">
+          <button id="save-blank" class="btn">Skip frame</button>
+          <button id="finish-roll" class="btn btn-danger-text">Finish roll</button>
+        </div>
+
+        <div class="section-title">This roll</div>
+        <div id="recent" class="frame-list"></div>
+      </div>
+    </section>
+
+    <!-- ============ NEW ROLL ============ -->
+    <section id="view-new" class="view" hidden>
+      <header class="topbar">
+        <button class="back-btn" onclick="history.back()">‹ Back</button>
+        <h1>Load a roll</h1>
+        <span></span>
+      </header>
+      <!-- Load-roll form -->
+      <div id="load-roll">
+        <div class="card">
+          
+          <label class="field-label" for="camera-select">Camera</label>
+          <select id="camera-select" class="select"></select>
+          <div id="camera-add" class="inline-add" hidden>
+            <input id="camera-new" class="input" placeholder="e.g. Nikon FM2" autocomplete="off">
+            <button id="camera-add-btn" class="btn btn-small">Add</button>
+          </div>
+
+          <label class="field-label" for="stock-select">Film stock</label>
+          <select id="stock-select" class="select"></select>
+          <input id="stock-custom" class="input" placeholder="Film stock name" autocomplete="off" hidden>
+
+          <div class="field-label">ISO</div>
+          <div class="dial" id="dial-iso"></div>
+
+          <div class="field-label">Exposures</div>
+          <div class="segmented" id="exposures-seg"></div>
+        </div>
+        <button id="start-roll" class="btn btn-primary btn-big">Load roll</button>
+      </div>
+
+    </section>
+
+    <!-- ============ ROLLS ============ -->
+    <section id="view-rolls" class="view" hidden>
+      <header class="topbar">
+        <button class="back-btn" data-nav="shoot">‹ Shoot</button>
+        <h1>Rolls</h1>
+        <button class="text-btn" data-nav="new">＋ New roll</button>
+      </header>
+      <div id="roll-list"></div>
+    </section>
+
+    <!-- ============ ROLL DETAIL ============ -->
+    <section id="view-roll" class="view" hidden>
+      <header class="topbar">
+        <button class="back-btn" data-nav="rolls">‹ Rolls</button>
+        <h1 id="detail-heading">Roll</h1>
+        <span></span>
+      </header>
+      <div id="roll-detail"></div>
+    </section>
+  </main>
+
+  <!-- Bottom sheet -->
+  <div id="sheet-backdrop" class="sheet-backdrop" hidden></div>
+  <div id="sheet" class="sheet" hidden role="dialog" aria-modal="true"></div>
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="{{ url_for('static', filename='app.js') }}?v=6"></script>
+</body>
+</html>
